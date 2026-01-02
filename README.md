@@ -4,7 +4,7 @@ Personal Algo Trading Server
 
 ## Intro
 - Strictly for Personal use. 
-- Will be Public till I get a Go Lang Job after that, it will be Private 🔒 and in EC2 making Trades 🤑.
+- Will be Public till I get a Go Lang Job, after that it will be Private 🔒 and in EC2 making Trades 🤑.
 
 ## MakeFile
 
