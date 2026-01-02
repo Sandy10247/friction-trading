@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"friction-trading-v2/internal/server"
+	"friction-trading/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
