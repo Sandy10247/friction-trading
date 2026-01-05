@@ -1,8 +1,10 @@
-# Project friction-trading
+# Project Friction Trading
+- Personal Algo Trading App
 
-Personal Algo Trading Server
+## Documentaton
+- https://pkg.go.dev/github.com/zerodha/gokiteconnect/v4
 
-## Intro
+## Disclaimer
 - Strictly for Personal use. 
 - Will be Public till I get a Go Lang Job, after that it will be Private 🔒 and in EC2 making Trades 🤑.
 
