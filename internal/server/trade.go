@@ -31,6 +31,26 @@ const SMA_PERIOD int = 10
 
 var positionStatus string = "NONE"
 
+// Supertrend Strategy
+func Supertrend(candleData []Candle) {
+	atrPeriod := 7    // Standard ATR period
+	multiplier := 3.0 // Standard multiplier
+
+	tr := CalculateTR(candlesData)
+	atr := CalculateATR(tr, atrPeriod)
+	supertrend := CalculateSupertrend(candlesData, atr, multiplier)
+	signals := GenerateSignals(candlesData, supertrend)
+	if len(signals) > 1 {
+		for i, signal := range signals {
+			if signal != "" {
+				fmt.Printf("At %s (close %.4f): %s\n", candlesData[i].Timestamp.Format("2006-01-02 15:04"), candlesData[i].Close, signal)
+			}
+		}
+	} else {
+		fmt.Printf("No Signal....✊\n")
+	}
+}
+
 // CalculateTR computes the True Range for each candle.
 func CalculateTR(candles []Candle) []float64 {
 	if len(candles) == 0 {

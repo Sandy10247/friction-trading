@@ -13,30 +13,29 @@ import (
 	"github.com/go-chi/cors"
 )
 
-// Supertrend Strategy
-func Supertrend(candleData []Candle) {
-	atrPeriod := 7    // Standard ATR period
-	multiplier := 3.0 // Standard multiplier
-
-	tr := CalculateTR(candlesData)
-	atr := CalculateATR(tr, atrPeriod)
-	supertrend := CalculateSupertrend(candlesData, atr, multiplier)
-	signals := GenerateSignals(candlesData, supertrend)
-	if len(signals) > 1 {
-		for i, signal := range signals {
-			if signal != "" {
-				fmt.Printf("At %s (close %.4f): %s\n", candlesData[i].Timestamp.Format("2006-01-02 15:04"), candlesData[i].Close, signal)
+// check Auth
+func AuthWithServerCtx(s *Server) func(http.Handler) http.Handler {
+	auth := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// check for Server Auth Token
+			if s.AccessToken != "" {
+				// This is the "next function" call
+				next.ServeHTTP(w, r)
+				return
 			}
-		}
-	} else {
-		fmt.Printf("No Signal....✊\n")
+
+			// timeout OCcurred Fuck off
+
+			fmt.Printf("GONE 🔴")
+			http.Error(w, "Not Authenticated", http.StatusUnauthorized)
+		})
 	}
+	return auth
 }
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
@@ -45,14 +44,19 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Route(`/api`, func(r chi.Router) {
-		// primary
-		r.Get("/ping", s.HelloWorldHandler)
+	// primary
+	r.Get("/ping", s.HelloWorldHandler)
 
-		// Login routes
-		r.Post("/login", s.loginHandler)
-		r.Get("/user/callback/kite/", s.loginCallbackHandler)
-		r.Get("/check-login", s.checkLoginHandler)
+	// Health check
+	r.Get("/health", s.healthHandler)
+
+	// Login routes
+	r.Post("/login", s.loginHandler)
+	r.Get("/api/user/callback/kite/", s.loginCallbackHandler)
+
+	r.Route(`/api`, func(r chi.Router) {
+		// Check Whether AccessToken is Fetched or not
+		r.Use(AuthWithServerCtx(s))
 
 		// User Routes
 		r.Get("/user/profile", s.profileHandler)
@@ -60,9 +64,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 		// Trading Routes
 		r.Get("/watch-nifty50-option", s.watchNifty50OptionHandler)
 	})
-
-	// Health check
-	r.Get("/health", s.healthHandler)
 
 	return r
 }
