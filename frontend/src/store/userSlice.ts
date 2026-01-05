@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 import { apiClient } from '../utils/api'
-import { CHECK_LOGIN_API_URL, LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL } from '../constants'
+import { LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL } from '../constants'
 import type { UserState } from '../store/types'
 
 
@@ -10,10 +10,6 @@ export const loginUser = createAsyncThunk('user/login', async () => {
     return response.data
 })
 
-export const checkLogin = createAsyncThunk('user/checkLogin', async () => {
-    const response = await apiClient.get(CHECK_LOGIN_API_URL)
-    return !!response.data.access_token
-})
 
 export const fetchProfile = createAsyncThunk('user/fetchProfile', async () => {
     const response = await apiClient.get(PROFILE_API_URL)
@@ -44,7 +40,7 @@ export const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(checkLogin.fulfilled, (state, action: PayloadAction<boolean>) => {
+            .addCase(loginUser.fulfilled, (state, action: PayloadAction<boolean>) => {
                 state.isLoggedIn = action.payload
                 console.log("Login status updated:", state.isLoggedIn)
             })

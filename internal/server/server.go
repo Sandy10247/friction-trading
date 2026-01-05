@@ -22,10 +22,11 @@ type Server struct {
 	db   database.Service
 
 	// Zerodha Kite
-	KiteClient  *kiteconnect.Client
-	AccessToken string // Access token for Kite Connect API 🔥
-	ApiKey      string // API Key for Kite
-	ApiSecret   string // API Secret for Kite
+	KiteClient    *kiteconnect.Client
+	AccessToken   string // Access token for Kite Connect API 🔥
+	ApiKey        string // API Key for Kite
+	ApiSecret     string // API Secret for Kite
+	AccessTokenCh chan string
 
 	// Ticker
 	ticker          *kiteticker.Ticker
@@ -44,13 +45,14 @@ func NewServer() *http.Server {
 	kc := kiteconnect.New(os.Getenv("KITE_API_KEY"))
 
 	NewServer := &Server{
-		port:        port,
-		db:          database.New(),
-		KiteClient:  kc,
-		AccessToken: os.Getenv("KITE_ACCESS_TOKEN"),
-		ApiKey:      os.Getenv("KITE_API_KEY"),
-		ApiSecret:   os.Getenv("KITE_API_SECRET"),
-		ctx:         context.Background(),
+		port:          port,
+		db:            database.New(),
+		KiteClient:    kc,
+		AccessToken:   os.Getenv("KITE_ACCESS_TOKEN"),
+		ApiKey:        os.Getenv("KITE_API_KEY"),
+		ApiSecret:     os.Getenv("KITE_API_SECRET"),
+		ctx:           context.Background(),
+		AccessTokenCh: make(chan string, 1),
 	}
 
 	// Declare Server config

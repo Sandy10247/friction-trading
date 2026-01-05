@@ -1,20 +1,28 @@
 import { useSelector, useDispatch } from 'react-redux'
-import { loginUser, checkLogin, selectIsLoggedIn, fetchProfile, watchNifty50Option } from './../store/userSlice'
+import { loginUser, selectIsLoggedIn, fetchProfile, watchNifty50Option, selectUserProfile } from './../store/userSlice'
 
-import { useInterval } from '../utils/hooks'
 
 import { useNavigate } from "react-router";
+import { useEffect } from 'react';
 
 
 const Navbar = () => {
 
     const dispatch = useDispatch()
     const navigate = useNavigate();
-    const isLoggedIn = useSelector(selectIsLoggedIn as any) as boolean
+    const isLoggedIn: boolean = useSelector(selectIsLoggedIn)
+    const profileData = useSelector(selectUserProfile)
 
     const handleLogin = () => {
         dispatch(loginUser() as any)
     }
+
+    useEffect(() => {
+        if (isLoggedIn && !profileData) {
+            // fetch user Profile 
+            dispatch(fetchProfile() as any)
+        }
+    }, [isLoggedIn])
 
     const handleProfile = () => {
         // Profile handler logic can be added here
@@ -32,16 +40,6 @@ const Navbar = () => {
         // Logic to watch Nifty 50 Option can be added here
         dispatch(watchNifty50Option() as any)
     }
-
-    useInterval(() => {
-        if (!isLoggedIn) {
-            dispatch(checkLogin() as any)
-            dispatch(fetchProfile() as any)
-        }
-    }, 4_000)
-
-
-
 
 
     return (
