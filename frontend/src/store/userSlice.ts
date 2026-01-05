@@ -1,15 +1,14 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 import { apiClient } from '../utils/api'
-import { LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL } from '../constants'
-import type { UserState } from '../store/types'
+import { LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL, MY_POSITION } from '../constants'
+import type { UserState, PositionsData } from '../store/types'
 
 
 export const loginUser = createAsyncThunk('user/login', async () => {
     const response = await apiClient.post(LOGIN_API_URL)
     return response.data
 })
-
 
 export const fetchProfile = createAsyncThunk('user/fetchProfile', async () => {
     const response = await apiClient.get(PROFILE_API_URL)
@@ -21,9 +20,18 @@ export const watchNifty50Option = createAsyncThunk('user/watchNifty50Option', as
     return response.data
 })
 
+export const fetchPositions = createAsyncThunk("user/fetchPositons", async () => {
+    const response = await apiClient.get(MY_POSITION)
+    return response.data
+})
+
 const initialState: UserState = {
     isLoggedIn: false,
     profile: null,
+    positonData: {
+        net: [],
+        day: []
+    }
 }
 
 export const userSlice = createSlice({
@@ -48,6 +56,10 @@ export const userSlice = createSlice({
                 console.log("Profile fetched:", action.payload)
                 state.profile = action.payload
             })
+            .addCase(fetchPositions.fulfilled, (state, action: PayloadAction<any>) => {
+                console.log("positonData fetched:", action.payload)
+                state.positonData = action.payload
+            })
     }
 })
 
@@ -57,5 +69,6 @@ export const { setLoginState, setUserProfile } = userSlice.actions
 // isLogged in Selector 
 export const selectIsLoggedIn = (state: { user: UserState }) => state.user.isLoggedIn
 export const selectUserProfile = (state: { user: UserState }) => state.user.profile
+export const selectPositionData = (state: { user: UserState }) => state.user.positonData
 
 export default userSlice.reducer

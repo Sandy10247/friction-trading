@@ -90,7 +90,6 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 
 // login
 func (s *Server) loginHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Using existing request token from file")
 	// Login `URL from which request token can be obtained
 	fmt.Println(s.KiteClient.GetLoginURL())
 
@@ -126,9 +125,6 @@ func (s *Server) loginHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) loginCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the request token from the query parameters
 	requestToken := r.URL.Query().Get("request_token")
-
-	// pritn request token
-	fmt.Printf("Request Token: %s\n", requestToken)
 
 	if requestToken == "" {
 		http.Error(w, "Missing request token", http.StatusBadRequest)

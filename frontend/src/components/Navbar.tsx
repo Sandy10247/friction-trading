@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux'
-import { loginUser, selectIsLoggedIn, fetchProfile, watchNifty50Option, selectUserProfile } from './../store/userSlice'
+import { loginUser, selectIsLoggedIn, fetchProfile, watchNifty50Option, selectUserProfile, fetchPositions } from './../store/userSlice'
 
 
 import { useNavigate } from "react-router";
@@ -21,15 +21,17 @@ const Navbar = () => {
         if (isLoggedIn && !profileData) {
             // fetch user Profile 
             dispatch(fetchProfile() as any)
+            // Fetch User Positions
+            dispatch(fetchPositions() as any)
         }
     }, [isLoggedIn])
 
     const handleProfile = () => {
-        // Profile handler logic can be added here
-        // Navigate to profile page or open profile modal
-        console.log("Profile button clicked")
-        // You can use React Router or any other method to navigate to the profile page
         navigate("/profile");
+    }
+
+    const handlePositon = () => {
+        navigate("/positions");
     }
 
     const handleLogoClick = () => {
@@ -75,6 +77,17 @@ const Navbar = () => {
                             onClick={handleProfile}
                         >
                             Profile
+                        </button>
+                    </div>}
+
+                    {/* Position */}
+                    {isLoggedIn && <div className="flex items-center space-x-6">
+                        <button className="px-8 py-3 text-base font-semibold text-gray-300 bg-gray-900 border-2 border-gray-800 rounded-full 
+              hover:bg-gray-800 hover:border-cyan-500 hover:text-cyan-300 hover:shadow-xl hover:shadow-cyan-500/20
+              transform hover:-translate-y-1 transition-all duration-300"
+                            onClick={handlePositon}
+                        >
+                            Positions
                         </button>
                     </div>}
                     {/* Watch Nifty 50 Option only after Login */}

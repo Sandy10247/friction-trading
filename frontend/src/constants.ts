@@ -12,3 +12,4 @@ export const CALLBACK_API_URL = `${API_BASE_URL}/user/callback/kite/`;
 export const HEALTH_API_URL = `${API_BASE_URL}/health`;
 export const PING_API_URL = `${API_BASE_URL}/ping`;
 export const WATCH_NIFTY50_OPTION_API_URL = `${API_BASE_URL}/watch-nifty50-option`;
+export const MY_POSITION = `${API_BASE_URL}/user/positons`

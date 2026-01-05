@@ -20,9 +20,30 @@ export interface UserProfile {
 
 export interface UserState {
     isLoggedIn: boolean
-    profile: UserProfile | null
+    profile: UserProfile | null,
+    positonData: PositionsData
+
 }
 
 export interface RootState {
     user: UserState
+}
+
+export interface Holding {
+    tradingsymbol: string;
+    exchange: string;
+    product: string;
+    quantity: number;
+    overnight_quantity: number;
+    average_price: number;
+    close_price: number;
+    last_price: number;
+    pnl: number;
+    unrealised: number;
+    realised: number;
+}
+
+export interface PositionsData {
+    net: Holding[];
+    day: Holding[];
 }
