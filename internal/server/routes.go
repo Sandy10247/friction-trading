@@ -11,6 +11,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+
+	"friction-trading/internal/utils"
 )
 
 // check Auth
@@ -95,7 +97,7 @@ func (s *Server) loginHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(s.KiteClient.GetLoginURL())
 
 	// open browser for login
-	openBrowser(s.KiteClient.GetLoginURL())
+	utils.OpenBrowser(s.KiteClient.GetLoginURL())
 	// Login URL from which request token can be obtained
 
 	// Sleep for 4 Seconds
