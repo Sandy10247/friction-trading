@@ -100,9 +100,6 @@ func (s *Server) loginHandler(w http.ResponseWriter, r *http.Request) {
 	utils.OpenBrowser(s.KiteClient.GetLoginURL())
 	// Login URL from which request token can be obtained
 
-	// Sleep for 4 Seconds
-	time.Sleep(4 * time.Second)
-
 	loginCtx, cancelFunc := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancelFunc()
 
