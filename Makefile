@@ -5,8 +5,7 @@ all: build test
 
 build:
 	@echo "Building..."
-	
-	
+	@npm run build --prefer-offline --no-fund --prefix ./frontend
 	@go build -o main cmd/api/main.go
 
 # Run the application
