@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 import { apiClient } from '../utils/api'
-import { LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL, MY_POSITION } from '../constants'
+import { LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL, MY_POSITION, USER_HOLDINGS } from '../constants'
 import type { UserState, PositionsData } from '../store/types'
 
 
@@ -25,13 +25,19 @@ export const fetchPositions = createAsyncThunk("user/fetchPositons", async () =>
     return response.data
 })
 
+export const fetchHoldings = createAsyncThunk("user/fetchHoldings", async () => {
+    const response = await apiClient.get(USER_HOLDINGS)
+    return response.data
+})
+
 const initialState: UserState = {
     isLoggedIn: false,
     profile: null,
     positonData: {
         net: [],
         day: []
-    }
+    },
+    holdings: []
 }
 
 export const userSlice = createSlice({
@@ -59,6 +65,10 @@ export const userSlice = createSlice({
             .addCase(fetchPositions.fulfilled, (state, action: PayloadAction<any>) => {
                 console.log("positonData fetched:", action.payload)
                 state.positonData = action.payload
+            })
+            .addCase(fetchHoldings.fulfilled, (state, action: PayloadAction<any>) => {
+                console.log("positonData Holdings:", action.payload)
+                state.holdings = action.payload
             })
     }
 })

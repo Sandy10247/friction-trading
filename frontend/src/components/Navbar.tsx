@@ -1,5 +1,9 @@
 import { useSelector, useDispatch } from 'react-redux'
-import { loginUser, selectIsLoggedIn, fetchProfile, watchNifty50Option, selectUserProfile, fetchPositions } from './../store/userSlice'
+import {
+    loginUser, selectIsLoggedIn, fetchProfile,
+    watchNifty50Option, selectUserProfile, fetchPositions,
+    fetchHoldings
+} from './../store/userSlice'
 
 
 import { useNavigate } from "react-router";
@@ -23,6 +27,8 @@ const Navbar = () => {
             dispatch(fetchProfile() as any)
             // Fetch User Positions
             dispatch(fetchPositions() as any)
+            // fetch user Holdings
+            dispatch(fetchHoldings() as any)
         }
     }, [isLoggedIn])
 
