@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
-	"sync"
 	"time"
+
+	"friction-trading/internal/config"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -26,35 +26,20 @@ type service struct {
 	db *pgx.Conn
 }
 
-var (
-	database = os.Getenv("BLUEPRINT_DB_DATABASE")
-	password = os.Getenv("BLUEPRINT_DB_PASSWORD")
-	username = os.Getenv("BLUEPRINT_DB_USERNAME")
-	port     = os.Getenv("BLUEPRINT_DB_PORT")
-	host     = os.Getenv("BLUEPRINT_DB_HOST")
-	sslMode    = os.Getenv("BLUEPRINT_DB_SSLMODE")
-	dbInstance *service
-)
+var dbInstance *service
 
-func DSN() string {
-	return "host=" + host +
-		" port=" + port +
-		" user=" + username +
-		" password=" + password +
-		" dbname=" + database +
-		" sslmode=" + sslMode
+func DSN(c *config.Config) string {
+	return "host=" + c.Database.Host +
+		" port=" + c.Database.Port +
+		" user=" + c.Database.Username +
+		" password=" + c.Database.Password +
+		" dbname=" + c.Database.DB +
+		" sslmode=" + c.Database.SSLMode
 }
 
-var onceInitDb = sync.OnceFunc(func() {
-	db := Connect()
-	dbInstance = &service{
-		db: db,
-	}
-})
-
-func Connect() *pgx.Conn {
+func Connect(c *config.Config) *pgx.Conn {
 	// Use conf.Database to constrct the connection string and connect to the database
-	connectionDsn := DSN()
+	connectionDsn := DSN(c)
 
 	// Example using pgx to connect to PostgreSQL
 	conn, err := pgx.Connect(context.Background(), connectionDsn)
@@ -71,8 +56,15 @@ func Connect() *pgx.Conn {
 	return conn
 }
 
-func New() Service {
-	onceInitDb()
+func New(c *config.Config) *service {
+	if dbInstance != nil {
+		return dbInstance
+	}
+
+	db := Connect(c)
+	dbInstance = &service{
+		db: db,
+	}
 	return dbInstance
 }
 
@@ -105,7 +97,7 @@ func (s *service) Health() map[string]string {
 // If the connection is successfully closed, it returns nil.
 // If an error occurs while closing the connection, it returns the error.
 func (s *service) Close() error {
-	log.Printf("Disconnected from database: %s", database)
+	log.Printf("Disconnected from database: ")
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	return s.db.Close(ctx)

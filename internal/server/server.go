@@ -6,15 +6,14 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
-	"friction-trading/internal/database"
-
-	_ "github.com/joho/godotenv/autoload"
 	kiteconnect "github.com/zerodha/gokiteconnect/v4"
 	kiteticker "github.com/zerodha/gokiteconnect/v4/ticker"
+
+	"friction-trading/internal/config"
+	"friction-trading/internal/database"
 )
 
 type Server struct {
@@ -34,23 +33,23 @@ type Server struct {
 
 	// Base Context
 	ctx context.Context
+
+	// Config
+	config *config.Config
 }
 
-func NewServer() *http.Server {
-	port, err := strconv.Atoi(os.Getenv("PORT"))
+func NewServer(c *config.Config) *http.Server {
+	port, err := strconv.Atoi(c.Server.Port)
 	if err != nil {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
 	}
 
-	kc := kiteconnect.New(os.Getenv("KITE_API_KEY"))
+	kc := kiteconnect.New(c.Kite.API_KEY)
 
 	NewServer := &Server{
 		port:          port,
-		db:            database.New(),
+		db:            database.New(c),
 		KiteClient:    kc,
-		AccessToken:   os.Getenv("KITE_ACCESS_TOKEN"),
-		ApiKey:        os.Getenv("KITE_API_KEY"),
-		ApiSecret:     os.Getenv("KITE_API_SECRET"),
 		ctx:           context.Background(),
 		AccessTokenCh: make(chan string, 1),
 	}

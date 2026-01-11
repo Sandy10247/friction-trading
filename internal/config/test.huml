@@ -1,0 +1,19 @@
+# Local Env Setup
+server::
+  PORT: "8080"
+  ENV: "local"
+
+databasee::
+  HOST: "localhost"
+  PORT: "5432"
+  DB: "test"
+  USERNAME: "brandon"
+  PASSWORD: "macullum"
+  SCHEMA: "local"
+  SSLMODE: "disable"
+
+# Zerodha
+kite::
+  API_KEY: "apiKeyFromZerodha"
+  API_SECRET: "apiSecreteFromZerodha"
+  TOKEN: "15056386"

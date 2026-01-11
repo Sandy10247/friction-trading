@@ -8,10 +8,11 @@ import (
 	"syscall"
 	"time"
 
+	"friction-trading/internal/config"
 	"friction-trading/internal/database"
 )
 
-func GracefulShutdown(apiServer *http.Server, done chan bool) {
+func GracefulShutdown(apiServer *http.Server, done chan bool, c *config.Config) {
 	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -31,7 +32,7 @@ func GracefulShutdown(apiServer *http.Server, done chan bool) {
 	}
 
 	// Close DB Connection
-	err := database.New().Close()
+	err := database.New(c).Close()
 	if err != nil {
 		log.Printf("Server forced to shutdown with error: %v", err)
 	}
