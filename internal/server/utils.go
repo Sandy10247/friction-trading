@@ -3,16 +3,14 @@ package server
 import (
 	"context"
 	"log"
-	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"friction-trading/internal/config"
-	"friction-trading/internal/database"
 )
 
-func GracefulShutdown(apiServer *http.Server, done chan bool, c *config.Config) {
+func GracefulShutdown(server *Server, done chan bool, c *config.Config) {
 	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -27,12 +25,12 @@ func GracefulShutdown(apiServer *http.Server, done chan bool, c *config.Config) 
 	// the request it is currently handling
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := apiServer.Shutdown(ctx); err != nil {
+	if err := server.HttpServer.Shutdown(ctx); err != nil {
 		log.Printf("Server forced to shutdown with error: %v", err)
 	}
 
 	// Close DB Connection
-	err := database.New(c).Close()
+	err := server.Store.Close()
 	if err != nil {
 		log.Printf("Server forced to shutdown with error: %v", err)
 	}

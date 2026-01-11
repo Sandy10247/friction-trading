@@ -17,14 +17,13 @@ import (
 )
 
 type Server struct {
-	port int
-	db   database.Service
+	port       int
+	Store      database.Store
+	HttpServer *http.Server
 
 	// Zerodha Kite
 	KiteClient    *kiteconnect.Client
 	AccessToken   string // Access token for Kite Connect API 🔥
-	ApiKey        string // API Key for Kite
-	ApiSecret     string // API Secret for Kite
 	AccessTokenCh chan string
 
 	// Ticker
@@ -38,7 +37,7 @@ type Server struct {
 	config *config.Config
 }
 
-func NewServer(c *config.Config) *http.Server {
+func NewServer(c *config.Config) *Server {
 	port, err := strconv.Atoi(c.Server.Port)
 	if err != nil {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
@@ -46,12 +45,15 @@ func NewServer(c *config.Config) *http.Server {
 
 	kc := kiteconnect.New(c.Kite.API_KEY)
 
+	conn := database.Connect(c)
+
 	NewServer := &Server{
 		port:          port,
-		db:            database.New(c),
+		Store:         database.NewStore(conn),
 		KiteClient:    kc,
 		ctx:           context.Background(),
 		AccessTokenCh: make(chan string, 1),
+		config:        c,
 	}
 
 	// Declare Server config
@@ -69,5 +71,7 @@ func NewServer(c *config.Config) *http.Server {
 		},
 	}
 
-	return server
+	NewServer.HttpServer = server
+
+	return NewServer
 }

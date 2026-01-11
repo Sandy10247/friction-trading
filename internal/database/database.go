@@ -26,7 +26,23 @@ type service struct {
 	db *pgx.Conn
 }
 
-var dbInstance *service
+type Store interface {
+	Querier
+	Close() error
+	Health() map[string]string
+}
+
+type ConduitStore struct {
+	*Queries // implements Querier
+	db       *pgx.Conn
+}
+
+func NewStore(db *pgx.Conn) Store {
+	return &ConduitStore{
+		db:      db,
+		Queries: New(db),
+	}
+}
 
 func DSN(c *config.Config) string {
 	return "host=" + c.Database.Host +
@@ -56,21 +72,9 @@ func Connect(c *config.Config) *pgx.Conn {
 	return conn
 }
 
-func New(c *config.Config) *service {
-	if dbInstance != nil {
-		return dbInstance
-	}
-
-	db := Connect(c)
-	dbInstance = &service{
-		db: db,
-	}
-	return dbInstance
-}
-
 // Health checks the health of the database connection by pinging the database.
 // It returns a map with keys indicating various health statistics.
-func (s *service) Health() map[string]string {
+func (s *ConduitStore) Health() map[string]string {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -96,7 +100,7 @@ func (s *service) Health() map[string]string {
 // It logs a message indicating the disconnection from the specific database.
 // If the connection is successfully closed, it returns nil.
 // If an error occurs while closing the connection, it returns the error.
-func (s *service) Close() error {
+func (s *ConduitStore) Close() error {
 	log.Printf("Disconnected from database: ")
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()

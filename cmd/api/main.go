@@ -24,7 +24,7 @@ func main() {
 	// Run graceful shutdown in a separate goroutine
 	go server.GracefulShutdown(newServer, done, configLoaded)
 
-	err = newServer.ListenAndServe()
+	err = newServer.HttpServer.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}

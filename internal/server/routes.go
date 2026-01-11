@@ -68,6 +68,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 		// Trading Routes
 		r.Get("/watch-nifty50-option", s.watchNifty50OptionHandler)
+		r.Get("/instruments", s.fetchAllInstruments)
 	})
 
 	return r
@@ -88,7 +89,7 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 
 // health handler
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, _ := json.Marshal(s.db.Health())
+	jsonResp, _ := json.Marshal(s.Store.Health())
 	_, _ = w.Write(jsonResp)
 }
 
@@ -133,7 +134,7 @@ func (s *Server) loginCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Use the request token to get the access token
-	data, err := s.KiteClient.GenerateSession(requestToken, s.ApiSecret)
+	data, err := s.KiteClient.GenerateSession(requestToken, s.config.Kite.API_SECRET)
 	if err != nil {
 		log.Fatalf("error generating session. Err: %v", err)
 	}

@@ -3,15 +3,18 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	kiteconnect "github.com/zerodha/gokiteconnect/v4"
 	kitemodels "github.com/zerodha/gokiteconnect/v4/models"
 	kiteticker "github.com/zerodha/gokiteconnect/v4/ticker"
 
+	"friction-trading/internal/database"
 	. "friction-trading/internal/utils"
 )
 
@@ -146,29 +149,6 @@ func sumCandleData(candleData []Candle) float64 {
 	return float64(total)
 }
 
-// Watch Nifty 50 Option
-func (s *Server) watchNifty50OptionHandler(w http.ResponseWriter, r *http.Request) {
-	// Create new Kite ticker instance
-	s.ticker = kiteticker.New(s.ApiKey, s.AccessToken)
-
-	// read instrument token from env
-	instToken := os.Getenv("TOKEN")
-
-	// Assign callbacks
-	s.ticker.OnError(onError)
-	s.ticker.OnClose(onClose)
-	s.ticker.OnConnect(onConnect(s, instToken))
-	s.ticker.OnReconnect(onReconnect)
-	s.ticker.OnNoReconnect(onNoReconnect)
-	s.ticker.OnTick(onTick)
-	s.ticker.OnOrderUpdate(onOrderUpdate)
-
-	// Spin up a Goroutine to start the Server and Control it with Context Cacelletation
-	go func() {
-		s.ticker.ServeWithContext(s.ctx)
-	}()
-}
-
 // Triggered when any error is raised
 func onError(err error) {
 	fmt.Println("Error: ", err)
@@ -265,4 +245,85 @@ func onNoReconnect(attempt int) {
 // Triggered when order update is received
 func onOrderUpdate(order kiteconnect.Order) {
 	fmt.Printf("Order: %s", order.OrderID)
+}
+
+// Watch Nifty 50 Option
+func (s *Server) watchNifty50OptionHandler(w http.ResponseWriter, r *http.Request) {
+	// Create new Kite ticker instance
+	s.ticker = kiteticker.New(s.config.Kite.API_KEY, s.AccessToken)
+
+	// read instrument token from env
+	instToken := os.Getenv("TOKEN")
+
+	// Assign callbacks
+	s.ticker.OnError(onError)
+	s.ticker.OnClose(onClose)
+	s.ticker.OnConnect(onConnect(s, instToken))
+	s.ticker.OnReconnect(onReconnect)
+	s.ticker.OnNoReconnect(onNoReconnect)
+	s.ticker.OnTick(onTick)
+	s.ticker.OnOrderUpdate(onOrderUpdate)
+
+	// Spin up a Goroutine to start the Server and Control it with Context Cacelletation
+	go func() {
+		s.ticker.ServeWithContext(s.ctx)
+	}()
+}
+
+// fetch All Instruments
+func (s *Server) fetchAllInstruments(w http.ResponseWriter, r *http.Request) {
+	instruments, err := s.KiteClient.GetInstruments()
+	if err != nil {
+
+		http.Error(w, "Error Fetching Instruments", http.StatusBadRequest)
+		return
+	}
+
+	f, err := os.OpenFile("instruments.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, item := range instruments {
+		str := fmt.Sprintf("%v", item)
+		i := database.InsertInstrumentParams{
+			InstrumentToken: int64(item.InstrumentToken),
+			ExchangeToken:   int64(item.ExchangeToken),
+			Tradingsymbol:   item.Tradingsymbol,
+			Name:            item.Name,
+			LastPrice:       item.LastPrice,
+			Expiry: pgtype.Timestamp{
+				Time:             item.Expiry.Time,
+				Valid:            true, // Mark as valid (not NULL)
+				InfinityModifier: pgtype.Finite,
+			},
+			Strike:         item.StrikePrice,
+			TickSize:       item.TickSize,
+			LotSize:        item.LotSize,
+			InstrumentType: item.InstrumentType,
+			Segment:        item.Segment,
+			Exchange:       item.Exchange,
+		}
+
+		_, err := s.Store.InsertInstrument(r.Context(), i)
+		if err != nil {
+			log.Printf("Error InsertInstrument :- %v,\nInstrument :- %#v\n", err, i)
+			http.Error(w, "Error InsertInstrument to DB", http.StatusBadRequest)
+			return
+		}
+		if _, err := f.Write([]byte(str)); err != nil {
+			http.Error(w, "Error Writing Instruments to file", http.StatusBadRequest)
+			return
+		}
+	}
+
+	// Get Instruments Count
+	count, err := s.Store.CountInstruments(r.Context())
+	if err != nil {
+		http.Error(w, "Error CountInstruments Instruments", http.StatusBadRequest)
+		return
+	}
+
+	// Save Instruments in File
+	_, _ = w.Write([]byte(fmt.Sprintf("%v", count)))
 }
