@@ -1,12 +1,18 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 import { apiClient } from '../utils/api'
-import { LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL, MY_POSITION, USER_HOLDINGS } from '../constants'
-import type { UserState, PositionsData } from '../store/types'
+import {
+    LOGIN_API_URL, PROFILE_API_URL, WATCH_NIFTY50_OPTION_API_URL,
+    MY_POSITION, USER_HOLDINGS, CHECK_LOGIN_URL
+} from '../constants'
+import type { UserState } from '../store/types'
 
 
 export const loginUser = createAsyncThunk('user/login', async () => {
     const response = await apiClient.post(LOGIN_API_URL)
+
+    // open Logn Url
+    window.open(response.data.url)
     return response.data
 })
 
@@ -27,6 +33,11 @@ export const fetchPositions = createAsyncThunk("user/fetchPositons", async () =>
 
 export const fetchHoldings = createAsyncThunk("user/fetchHoldings", async () => {
     const response = await apiClient.get(USER_HOLDINGS)
+    return response.data
+})
+
+export const checkLoginUrl = createAsyncThunk('user/checkLogin', async () => {
+    const response = await apiClient.get(CHECK_LOGIN_URL)
     return response.data
 })
 
@@ -54,7 +65,7 @@ export const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(loginUser.fulfilled, (state, action: PayloadAction<boolean>) => {
+            .addCase(checkLoginUrl.fulfilled, (state, action: PayloadAction<boolean>) => {
                 state.isLoggedIn = action.payload
                 console.log("Login status updated:", state.isLoggedIn)
             })

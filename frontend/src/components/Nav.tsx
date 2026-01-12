@@ -7,6 +7,7 @@ import {
     selectUserProfile,
     fetchPositions,
     fetchHoldings,
+    checkLoginUrl
 } from './../store/userSlice';
 
 import { useNavigate } from "react-router";
@@ -31,6 +32,19 @@ const Navbar = () => {
             dispatch(fetchHoldings() as any);
         }
     }, [isLoggedIn, profile, dispatch]);
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            const intervalId = setInterval(() => {
+                dispatch(checkLoginUrl() as any);
+            }, 1_000)
+
+            return () => {
+                clearInterval(intervalId)
+            }
+        }
+
+    }, [isLoggedIn])
 
     const handleLogin = () => {
         dispatch(loginUser() as any);

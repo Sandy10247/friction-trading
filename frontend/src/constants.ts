@@ -8,6 +8,7 @@ export const API_BASE_URL = `${BaseUrl}/api`;
 
 // Apis
 export const LOGIN_API_URL = `${BaseUrl}/login`;
+export const CHECK_LOGIN_URL = `${BaseUrl}/check-login`;
 export const PROFILE_API_URL = `${API_BASE_URL}/user/profile`;
 export const CALLBACK_API_URL = `${API_BASE_URL}/user/callback/kite/`;
 export const USER_HOLDINGS = `${API_BASE_URL}/user/holdings`

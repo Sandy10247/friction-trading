@@ -1,18 +1,14 @@
 package server
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-
-	"friction-trading/internal/utils"
 )
 
 // check Auth
@@ -55,6 +51,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Login routes
 	r.Post("/login", s.loginHandler)
+	r.Get("/check-login", s.checkLogin)
 	r.Get("/api/user/callback/kite/", s.loginCallbackHandler)
 
 	r.Route(`/api`, func(r chi.Router) {
@@ -93,34 +90,14 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
-// login
+// login :- Send Login urls
 func (s *Server) loginHandler(w http.ResponseWriter, r *http.Request) {
-	// Login `URL from which request token can be obtained
-	fmt.Println(s.KiteClient.GetLoginURL())
-
-	// open browser for login
-	utils.OpenBrowser(s.KiteClient.GetLoginURL())
-	// Login URL from which request token can be obtained
-
-	loginCtx, cancelFunc := context.WithTimeout(r.Context(), 5*time.Second)
-	defer cancelFunc()
-
-	select {
-	case <-loginCtx.Done():
-		// timeout OCcurred Fuck off
-		http.Error(w, "Login Not Completed ", http.StatusInternalServerError)
-	case <-s.AccessTokenCh:
-		// AccessToken received Complete Login Process
-		resp := make(map[string]string)
-		// Access Token Received,
-		resp["message"] = "Login Completed 👍"
-		// Respond to the client
-		jsonResp, err := json.Marshal(resp)
-		if err != nil {
-			log.Fatalf("error handling JSON marshal. Err: %v", err)
-		}
-		_, _ = w.Write(jsonResp)
+	jsonResp, err := json.Marshal(map[string]string{"url": s.KiteClient.GetLoginURL()})
+	if err != nil {
+		log.Fatalf("error handling JSON marshal. Err: %v", err)
 	}
+
+	_, _ = w.Write(jsonResp)
 }
 
 // Login Callback Handler
@@ -153,4 +130,14 @@ func (s *Server) loginCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, _ = w.Write(jsonResp)
+}
+
+// Check Login handler
+func (s *Server) checkLogin(w http.ResponseWriter, r *http.Request) {
+	if s.AccessToken == "" {
+		// timeout OCcurred Fuck off
+		http.Error(w, "Login Not Completed ", http.StatusUnauthorized)
+	}
+
+	_, _ = w.Write([]byte("Done ✅"))
 }
