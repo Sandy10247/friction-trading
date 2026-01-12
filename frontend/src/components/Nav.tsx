@@ -96,7 +96,8 @@ const Navbar = () => {
                         </h1>
                     </div>
 
-                    <SearchBar />
+                    {/* Search Bar */}
+                    {isLoggedIn && <SearchBar />}
 
                     {/* Right side: Auth / User actions */}
                     <div className="flex items-center space-x-6">

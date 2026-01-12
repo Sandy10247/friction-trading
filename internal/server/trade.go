@@ -348,6 +348,7 @@ func (s *Server) searchSymbol(w http.ResponseWriter, r *http.Request) {
 	// Make the DB hit for Results
 	results, err := s.Store.SearchSymbol(r.Context(), finalSearchTerm)
 	if err != nil {
+		log.Printf("Error searchMarket :- %v\n", err)
 		http.Error(w, "Error searchMarket ", http.StatusInternalServerError)
 		return
 	}

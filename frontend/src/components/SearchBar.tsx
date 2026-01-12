@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, type ChangeEvent } from 'react';
+import React, { useState, useCallback, type ChangeEvent } from 'react';
 
 import { SEARCH_SYMBOL } from '../constants';
 import { apiClient } from '../utils/api';
