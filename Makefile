@@ -63,3 +63,11 @@ watch:
         fi
 
 .PHONY: all build run test clean watch docker-run docker-down itest
+
+# Generate SQLC bindings
+gen:
+	@echo "SQLC Generate Running...💾"
+	@sqlc generate
+
+
+

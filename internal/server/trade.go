@@ -273,7 +273,7 @@ func (s *Server) watchNifty50OptionHandler(w http.ResponseWriter, r *http.Reques
 	}()
 }
 
-// fetch All Instruments
+// fetch All Instruments and Store them in "instruments" table
 func (s *Server) fetchAllInstruments(w http.ResponseWriter, r *http.Request) {
 	instruments, err := s.KiteClient.GetInstruments()
 	if err != nil {
