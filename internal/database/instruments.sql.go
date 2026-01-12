@@ -79,3 +79,17 @@ func (q *Queries) InsertInstrument(ctx context.Context, arg InsertInstrumentPara
 	)
 	return &i, err
 }
+
+const truncateInstrument = `-- name: TruncateInstrument :one
+TRUNCATE TABLE instruments
+`
+
+type TruncateInstrumentRow struct {
+}
+
+func (q *Queries) TruncateInstrument(ctx context.Context) (*TruncateInstrumentRow, error) {
+	row := q.db.QueryRow(ctx, truncateInstrument)
+	var i TruncateInstrumentRow
+	err := row.Scan()
+	return &i, err
+}

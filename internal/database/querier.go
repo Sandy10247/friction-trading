@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	CountInstruments(ctx context.Context) (int64, error)
 	InsertInstrument(ctx context.Context, arg InsertInstrumentParams) (*Instrument, error)
+	TruncateInstrument(ctx context.Context) (*TruncateInstrumentRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

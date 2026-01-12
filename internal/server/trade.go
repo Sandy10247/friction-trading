@@ -2,6 +2,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +18,8 @@ import (
 	"friction-trading/internal/database"
 	. "friction-trading/internal/utils"
 )
+
+var ErrNoRowsFound = errors.New("no rows in result set")
 
 // Candle represents a 5-minute OHLC candle.
 type Candle struct {
@@ -274,19 +277,24 @@ func (s *Server) watchNifty50OptionHandler(w http.ResponseWriter, r *http.Reques
 func (s *Server) fetchAllInstruments(w http.ResponseWriter, r *http.Request) {
 	instruments, err := s.KiteClient.GetInstruments()
 	if err != nil {
-
 		http.Error(w, "Error Fetching Instruments", http.StatusBadRequest)
 		return
 	}
 
-	f, err := os.OpenFile("instruments.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	if err != nil {
-		log.Fatal(err)
+	// Get Instruments Count
+	count, err := s.Store.CountInstruments(r.Context())
+
+	// Truncate Existing Table with rows
+	if count > 0 {
+		if _, err = s.Store.TruncateInstrument(r.Context()); err != nil && ErrNoRowsFound.Error() != err.Error() {
+			log.Printf("Error Truncate Instrument :- %v\n", err)
+			http.Error(w, "Error Truncate Instrument", http.StatusBadRequest)
+			return
+		}
 	}
 
 	for _, item := range instruments {
-		str := fmt.Sprintf("%v", item)
-		i := database.InsertInstrumentParams{
+		insertInstrumentParam := database.InsertInstrumentParams{
 			InstrumentToken: int64(item.InstrumentToken),
 			ExchangeToken:   int64(item.ExchangeToken),
 			Tradingsymbol:   item.Tradingsymbol,
@@ -305,20 +313,16 @@ func (s *Server) fetchAllInstruments(w http.ResponseWriter, r *http.Request) {
 			Exchange:       item.Exchange,
 		}
 
-		_, err := s.Store.InsertInstrument(r.Context(), i)
+		_, err := s.Store.InsertInstrument(r.Context(), insertInstrumentParam)
 		if err != nil {
-			log.Printf("Error InsertInstrument :- %v,\nInstrument :- %#v\n", err, i)
+			log.Printf("Error InsertInstrument :- %v,\nInstrument :- %#v\n", err, insertInstrumentParam)
 			http.Error(w, "Error InsertInstrument to DB", http.StatusBadRequest)
-			return
-		}
-		if _, err := f.Write([]byte(str)); err != nil {
-			http.Error(w, "Error Writing Instruments to file", http.StatusBadRequest)
 			return
 		}
 	}
 
 	// Get Instruments Count
-	count, err := s.Store.CountInstruments(r.Context())
+	count, err = s.Store.CountInstruments(r.Context())
 	if err != nil {
 		http.Error(w, "Error CountInstruments Instruments", http.StatusBadRequest)
 		return
