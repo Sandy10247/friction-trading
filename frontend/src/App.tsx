@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 
-import Navbar from './components/Navbar'
 import { apiClient } from './utils/api'
 import { PING_API_URL } from './constants'
+
+import Navbar from './components/Nav'
 
 function App() {
   const [message, setMessage] = useState<string>('')
