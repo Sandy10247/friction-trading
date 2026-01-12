@@ -1,8 +1,9 @@
-
-
 const host = window.location.hostname;
 
-const BaseUrl = `http://${host}:${import.meta.env.VITE_PORT}`
+
+console.log("ENV :- ", import.meta.env)
+
+export const BaseUrl = `http://${host}:${import.meta.env.VITE_SERVER_PORT}`
 export const API_BASE_URL = `${BaseUrl}/api`;
 
 // Apis

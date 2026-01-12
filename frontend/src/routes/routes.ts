@@ -13,7 +13,6 @@ const router = createBrowserRouter([
         ]
 
     },
-    // { path: "/profile", Component: ProfileComponent }
 ]);
 
 export default router;
