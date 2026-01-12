@@ -48,7 +48,7 @@ const initialState: UserState = {
         net: [],
         day: []
     },
-    holdings: []
+    holdings: [],
 }
 
 export const userSlice = createSlice({

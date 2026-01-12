@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -22,9 +21,7 @@ func AuthWithServerCtx(s *Server) func(http.Handler) http.Handler {
 				return
 			}
 
-			// timeout OCcurred Fuck off
-
-			fmt.Printf("GONE 🔴")
+			// Not Autheried
 			http.Error(w, "Not Authenticated", http.StatusUnauthorized)
 		})
 	}
@@ -54,6 +51,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Get("/check-login", s.checkLogin)
 	r.Get("/api/user/callback/kite/", s.loginCallbackHandler)
 
+	// "/api" routes
 	r.Route(`/api`, func(r chi.Router) {
 		// Check Whether AccessToken is Fetched or not
 		r.Use(AuthWithServerCtx(s))
@@ -66,6 +64,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		// Trading Routes
 		r.Get("/watch-nifty50-option", s.watchNifty50OptionHandler)
 		r.Get("/instruments", s.fetchAllInstruments)
+		r.Get("/symbol_search", s.searchSymbol)
 	})
 
 	return r
@@ -139,5 +138,5 @@ func (s *Server) checkLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Login Not Completed ", http.StatusUnauthorized)
 	}
 
-	_, _ = w.Write([]byte("Done ✅"))
+	_, _ = w.Write([]byte("Login Successfull ✅"))
 }

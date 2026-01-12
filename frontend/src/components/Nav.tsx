@@ -13,6 +13,8 @@ import {
 import { useNavigate } from "react-router";
 import { useEffect } from 'react';
 
+import SearchBar from './SearchBar';
+
 const Navbar = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -93,6 +95,8 @@ const Navbar = () => {
                             <span className="ml-3 text-3xl text-cyan-300 font-bold">Trading</span>
                         </h1>
                     </div>
+
+                    <SearchBar />
 
                     {/* Right side: Auth / User actions */}
                     <div className="flex items-center space-x-6">

@@ -80,6 +80,45 @@ func (q *Queries) InsertInstrument(ctx context.Context, arg InsertInstrumentPara
 	return &i, err
 }
 
+const searchSymbol = `-- name: SearchSymbol :many
+SELECT id, instrument_token, exchange_token, tradingsymbol, name, last_price, expiry, strike, tick_size, lot_size, instrument_type, segment, exchange
+	FROM instruments WHERE tradingsymbol ILIKE $1
+`
+
+func (q *Queries) SearchSymbol(ctx context.Context, tradingsymbol string) ([]*Instrument, error) {
+	rows, err := q.db.Query(ctx, searchSymbol, tradingsymbol)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*Instrument
+	for rows.Next() {
+		var i Instrument
+		if err := rows.Scan(
+			&i.ID,
+			&i.InstrumentToken,
+			&i.ExchangeToken,
+			&i.Tradingsymbol,
+			&i.Name,
+			&i.LastPrice,
+			&i.Expiry,
+			&i.Strike,
+			&i.TickSize,
+			&i.LotSize,
+			&i.InstrumentType,
+			&i.Segment,
+			&i.Exchange,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const truncateInstrument = `-- name: TruncateInstrument :one
 TRUNCATE TABLE instruments
 `

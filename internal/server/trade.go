@@ -2,12 +2,14 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -330,4 +332,35 @@ func (s *Server) fetchAllInstruments(w http.ResponseWriter, r *http.Request) {
 
 	// Save Instruments in File
 	_, _ = w.Write([]byte(fmt.Sprintf("%v", count)))
+}
+
+// Symbol Search API :- v1
+func (s *Server) searchSymbol(w http.ResponseWriter, r *http.Request) {
+	// Search Pattern
+	searchPattern := "%{TERM}%"
+
+	// Extract Search Query Params
+	searchText := r.URL.Query().Get("text")
+
+	// construct the Search String
+	finalSearchTerm := strings.Replace(searchPattern, "{TERM}", searchText, -1)
+
+	// Make the DB hit for Results
+	results, err := s.Store.SearchSymbol(r.Context(), finalSearchTerm)
+	if err != nil {
+		http.Error(w, "Error searchMarket ", http.StatusInternalServerError)
+		return
+	}
+
+	// Send the Response
+	resp := map[string][]*database.Instrument{}
+	resp["results"] = results
+
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Printf("error handling JSON marshal. Err: %v\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	_, _ = w.Write(jsonResp)
 }

@@ -14,4 +14,6 @@ INSERT INTO instruments (
 -- name: TruncateInstrument :one
 TRUNCATE TABLE instruments;
 
-
+-- name: SearchSymbol :many
+SELECT id, instrument_token, exchange_token, tradingsymbol, name, last_price, expiry, strike, tick_size, lot_size, instrument_type, segment, exchange
+	FROM instruments WHERE tradingsymbol ILIKE $1;
