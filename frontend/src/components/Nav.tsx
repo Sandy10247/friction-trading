@@ -5,8 +5,6 @@ import {
     fetchProfile,
     watchNifty50Option,
     selectUserProfile,
-    fetchPositions,
-    fetchHoldings,
     checkLoginUrl
 } from './../store/userSlice';
 
@@ -30,8 +28,6 @@ const Navbar = () => {
             if (!profile) {
                 dispatch(fetchProfile() as any);
             }
-            dispatch(fetchPositions() as any);
-            dispatch(fetchHoldings() as any);
         }
     }, [isLoggedIn, profile, dispatch]);
 

@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
@@ -10,6 +12,13 @@ import (
 	"friction-trading/internal/config"
 )
 
+// Response represents response struct.
+type Response struct {
+	Data  interface{} `json:"data,omitempty"`
+	Error string      `json:"error,omitempty"`
+}
+
+// Gracefull Teriminate Server
 func GracefulShutdown(server *Server, done chan bool, c *config.Config) {
 	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -39,4 +48,24 @@ func GracefulShutdown(server *Server, done chan bool, c *config.Config) {
 
 	// Notify the main goroutine that the shutdown is complete
 	done <- true
+}
+
+// sendJSONResp sends data and error as a JSON HTTP response.
+func SendJSONResp(data any, err error, code int, w http.ResponseWriter) {
+	var errMsg string
+	if err != nil {
+		errMsg = err.Error()
+	}
+	resp := Response{
+		Data:  data,
+		Error: errMsg,
+	}
+	r, errJSON := json.Marshal(resp)
+	if errJSON != nil {
+		log.Printf("error marshalling response: %v", errJSON)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(code)
+	w.Write(r)
 }

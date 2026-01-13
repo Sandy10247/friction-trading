@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 
 import App from "../App";
-import DashboardTabs from "../components/DashboardTabs";
+import DashboardTabs from "../components/Dashboard";
 
 
 

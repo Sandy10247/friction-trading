@@ -58,9 +58,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 		// User Routes
 		r.Get("/user/profile", s.profileHandler)
-		r.Get("/user/positons", s.positionsHandler)
-		r.Get("/user/holdings", s.holdingsHandler)
-
 		// Trading Routes
 		r.Get("/watch-nifty50-option", s.watchNifty50OptionHandler)
 		r.Get("/instruments", s.fetchAllInstruments)

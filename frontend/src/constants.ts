@@ -15,9 +15,7 @@ export const PING_API_URL = `${BaseUrl}/ping`;
 // Apis
 export const PROFILE_API_URL = `${API_BASE_URL}/user/profile`;
 export const CALLBACK_API_URL = `${API_BASE_URL}/user/callback/kite/`;
-export const USER_HOLDINGS = `${API_BASE_URL}/user/holdings`
 export const WATCH_NIFTY50_OPTION_API_URL = `${API_BASE_URL}/watch-nifty50-option`;
-export const MY_POSITION = `${API_BASE_URL}/user/positons`
 export const SEARCH_SYMBOL = `${API_BASE_URL}/symbol_search`
 
 

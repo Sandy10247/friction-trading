@@ -20,9 +20,7 @@ export interface UserProfile {
 
 export interface UserState {
     isLoggedIn: boolean
-    profile: UserProfile | null,
-    positonData: PositionsData
-    holdings: []
+    profileData: any
 
 }
 

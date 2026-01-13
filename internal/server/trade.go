@@ -343,7 +343,7 @@ func (s *Server) searchSymbol(w http.ResponseWriter, r *http.Request) {
 	searchText := r.URL.Query().Get("text")
 
 	// construct the Search String
-	finalSearchTerm := strings.Replace(searchPattern, "{TERM}", searchText, -1)
+	finalSearchTerm := strings.ReplaceAll(searchPattern, "{TERM}", searchText)
 
 	// Make the DB hit for Results
 	results, err := s.Store.SearchSymbol(r.Context(), finalSearchTerm)
