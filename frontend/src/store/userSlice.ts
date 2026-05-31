@@ -33,6 +33,7 @@ const initialState: UserState = {
     margins: {},
     portfolio: [],
     positions: {},
+    profile: {},
   },
 };
 

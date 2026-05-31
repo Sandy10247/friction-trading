@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -63,6 +65,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Get("/instruments", s.fetchAllInstruments)
 		r.Get("/symbol_search", s.searchSymbol)
 	})
+
+	reactBuildDir := "./frontend/dist"
+	serveReactSPA(r, reactBuildDir)
 
 	return r
 }
@@ -136,4 +141,27 @@ func (s *Server) checkLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, _ = w.Write([]byte("Login Successfull ✅"))
+}
+
+// serveReactSPA sets up routing for static files and handles SPA routing fallback.
+func serveReactSPA(r *chi.Mux, publicDir string) {
+	fs := http.FileServer(http.Dir(publicDir))
+
+	// Catch-all route for frontend assets and SPA routes
+	r.Get("/*", func(w http.ResponseWriter, req *http.Request) {
+		path := filepath.Clean(req.URL.Path)
+		fullPath := filepath.Join(publicDir, path)
+
+		// Check if the requested file physically exists on the disk
+		info, err := os.Stat(fullPath)
+		if os.IsNotExist(err) || info.IsDir() {
+			// File does not exist, or it is a directory.
+			// Serve index.html to allow React Router to handle client-side routing.
+			http.ServeFile(w, req, filepath.Join(publicDir, "index.html"))
+			return
+		}
+
+		// File exists, let http.FileServer transmit it (JS, CSS, images, etc.)
+		fs.ServeHTTP(w, req)
+	})
 }

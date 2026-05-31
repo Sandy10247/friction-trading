@@ -33,3 +33,6 @@ main
 # OS X generated file
 .DS_Store
 
+./frontend/node_modules/*
+
+./frontend/dist

@@ -109,7 +109,7 @@ const TradingDashboard: React.FC = () => {
     return num.toLocaleString('en-IN', { maximumFractionDigits: 2 });
   };
 
-  const renderMarginTable = (obj: Record<string, number>, title: string) => (
+  const renderMarginTable = (obj: AvailableMargin | UtilisedMargin, title: string) => (
     <div className="mt-6">
       <h4 className="text-lg font-semibold text-gray-300 mb-3">{title}</h4>
       <div className="overflow-x-auto rounded-lg border border-gray-700">

@@ -1,9 +1,6 @@
-const host = window.location.hostname;
+const host = window.location.origin;
 
-
-console.log("ENV :- ", import.meta.env)
-
-export const BaseUrl = `http://${host}:${import.meta.env.VITE_SERVER_PORT}`
+export const BaseUrl = host;
 export const API_BASE_URL = `${BaseUrl}/api`;
 
 // Base
@@ -16,7 +13,4 @@ export const PING_API_URL = `${BaseUrl}/ping`;
 export const PROFILE_API_URL = `${API_BASE_URL}/user/profile`;
 export const CALLBACK_API_URL = `${API_BASE_URL}/user/callback/kite/`;
 export const WATCH_NIFTY50_OPTION_API_URL = `${API_BASE_URL}/watch-nifty50-option`;
-export const SEARCH_SYMBOL = `${API_BASE_URL}/symbol_search`
-
-
-
+export const SEARCH_SYMBOL = `${API_BASE_URL}/symbol_search`;
